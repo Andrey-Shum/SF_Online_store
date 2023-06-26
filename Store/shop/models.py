@@ -8,6 +8,12 @@ from .resources import POSITIONS, cashier
 
 class Staff(models.Model):
     """ Персонал """
+    director = 'DI'
+    admin = 'AD'
+    cook = 'CO'
+    cashier = 'CA'
+    cleaner = 'CL'
+
     full_name = models.CharField(max_length=255)
     position = models.CharField(max_length=2, choices=POSITIONS, default=cashier)
     labor_contract = models.IntegerField()
