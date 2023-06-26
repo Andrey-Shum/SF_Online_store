@@ -1,15 +1,15 @@
 from django.db import models
 from datetime import datetime, timezone
 
-from Store.shop.resources import POSITIONS, cashier
+from .resources import POSITIONS, cashier
 
 
-# Create your models here.
+# Create your models here (Создавайте свои модели здесь).
 
 class Staff(models.Model):
     """ Персонал """
     full_name = models.CharField(max_length=255)
-    position = models.CharField(max_length=2, choices = POSITIONS, default=cashier)
+    position = models.CharField(max_length=2, choices=POSITIONS, default=cashier)
     labor_contract = models.IntegerField()
 
     def get_last_name(self):
