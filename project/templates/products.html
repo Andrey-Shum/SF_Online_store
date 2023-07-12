@@ -1,0 +1,46 @@
+{% extends 'flatpages/default.html' %}
+<!-- Подключаем новый файл с нашим тегом -->
+{% load custom_filters %}
+
+{% block title %}
+Products
+{% endblock title %}
+
+{% block content %}
+    <h1>Все товары</h1>
+    <h3>{{ time_now|date:'M d Y' }}</h3>
+    <!-- Если в переменной next_sale будет None,
+    то выведется указанный в фильтре текст -->
+    <h3> {{ next_sale|default_if_none:"Чуть позже сообщим о распродаже!" }}
+    </h3>
+
+    <hr>
+    {% if products %}
+        <table>
+           <tr>
+               <td>Название</td>
+               <td>Описание</td>
+               <td>Категория</td>
+               <td>Цена</td>
+               <td>Количество</td>
+           </tr>
+
+           {% for product in products %}
+           <tr>
+               <td><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></td>
+                <!-- Добавим специальный фильтр truncatechars,
+                чтобы ограничить количество символов до 15.
+                Все остальные символы превратятся в многоточие. -->
+               <td>{{ product.description|truncatechars:15 }}</td>
+               <td>{{ product.category.name }}</td>
+               <!-- Используем наш фильтр -->
+               <td>{{ product.price|currency }}</td>
+               <td>{{ product.quantity }}</td>
+           </tr>
+           {% endfor %}
+
+        </table>
+    {% else %}
+        <h2>Товаров нет!</h2>
+    {% endif %}
+{% endblock content %}
