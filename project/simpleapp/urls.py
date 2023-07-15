@@ -10,9 +10,11 @@ urlpatterns = [
    # а Django ожидает функцию, нам надо представить этот класс в виде view.
    # Для этого вызываем метод as_view.
    path('', ProductsList.as_view()),
+   #
    # pk — это первичный ключ товара, который будет выводиться у нас в шаблон
    # int — указывает на то, что принимаются только целочисленные значения
    # для создания ссылки вместо имени
+   #
    # path('<int:pk>', ProductDetail.as_view()),
    # заменить на
    path('products/<int:pk>/', ProductDetail.as_view(), name='product_detail'),

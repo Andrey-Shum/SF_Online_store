@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
-    'simpleapp.apps.SimpleappConfig'
+    'simpleapp.apps.SimpleappConfig',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
