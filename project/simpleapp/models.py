@@ -1,5 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.urls import reverse
+# специальная функция reverse, которая позволяет нам указывать не путь вида /products/…,
+# а название пути.
 
 
 # Товар для нашей витрины
@@ -24,6 +27,11 @@ class Product(models.Model):
 
     def __str__(self):
         return f'{self.name.title()}: {self.description[:20]} ({self.price})'
+
+    # Django не знает, какую страницу нужно открыть после создания товара. Мы можем убрать проблему,
+    # добавив метод get_absolute_url в модель
+    def get_absolute_url(self):
+        return reverse('product_detail', args=[str(self.id)])
 
 
 # Категория, к которой будет привязываться товар

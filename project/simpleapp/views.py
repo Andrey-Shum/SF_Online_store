@@ -1,9 +1,12 @@
 from datetime import datetime
 # Импортируем класс, который говорит нам о том,
 # что в этом представлении мы будем выводить список объектов из БД
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView
+from django.shortcuts import render
+
+from .forms import ProductForm
 from .models import Product
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from .filters import ProductFilter
 
 
@@ -77,3 +80,25 @@ def multiply(request):
         html = f"<html><body>Invalid input.</body></html>"
 
     return HttpResponse(html)
+
+
+# def create_product(request):
+#     form = ProductForm()  # если здесь стока то перейдёт в рендер форму с информацией об ошибке
+#     # если после пользователю отправится пустая форма без информации об ошибке
+#
+#     if request.method == 'POST':
+#         form = ProductForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return HttpResponseRedirect('/products/')
+#
+#     return render(request, 'product_edit.html', {'form': form})
+
+# Добавляем новое представление для создания товаров.
+class ProductCreate(CreateView):
+    # Указываем нашу разработанную форму
+    form_class = ProductForm
+    # модель товаров
+    model = Product
+    # и новый шаблон, в котором используется форма.
+    template_name = 'product_edit.html'
