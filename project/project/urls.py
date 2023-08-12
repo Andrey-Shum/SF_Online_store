@@ -26,4 +26,9 @@ urlpatterns = [
    # подключались к главному приложению с префиксом products/.
    path('products/', include('simpleapp.urls')),
    path('multiply/', multiply),
+   # Добавим urls приложения, с которым ранее работали в этом модуле — “django.contrib.auth”.
+   # Django скажет, как обрабатывать запросы от пользователей по ссылкам, которые начинаются с /accounts/.
+   # path('accounts/', include('django.contrib.auth.urls')),
+   # path("accounts/", include("accounts.urls")),  # подключим urls приложения accounts
+   path("accounts/", include("allauth.urls")),  # Оставили только allauth
 ]
