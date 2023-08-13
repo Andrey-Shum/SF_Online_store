@@ -1,9 +1,9 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from datetime import datetime
 # Импортируем класс, который говорит нам о том,
 # что в этом представлении мы будем выводить список объектов из БД
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render
 
 from .forms import ProductForm
@@ -97,11 +97,32 @@ def multiply(request):
 #     return render(request, 'product_edit.html', {'form': form})
 
 # Добавляем новое представление для создания товаров.
-class ProductCreate(LoginRequiredMixin, CreateView):
-    raise_exception = True
-    # Указываем нашу разработанную форму
+# class ProductCreate(LoginRequiredMixin, CreateView):
+#     raise_exception = True
+#     # Указываем нашу разработанную форму
+#     form_class = ProductForm
+#     # модель товаров
+#     model = Product
+#     # и новый шаблон, в котором используется форма.
+#     template_name = 'product_edit.html'
+
+
+class ProductCreate(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    permission_required = ('simpleapp.add_product',)
     form_class = ProductForm
-    # модель товаров
     model = Product
-    # и новый шаблон, в котором используется форма.
     template_name = 'product_edit.html'
+
+
+class ProductUpdate(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    permission_required = ('simpleapp.change_product',)
+    form_class = ProductForm
+    model = Product
+    template_name = 'product_edit.html'
+
+
+class ProductDelete(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    permission_required = ('simpleapp.delete_product',)
+    model = Product
+    template_name = 'product_delete.html'
+    success_url = reverse_lazy('product_list')

@@ -25,10 +25,10 @@ urlpatterns = [
    # Делаем так, чтобы все адреса из нашего приложения (simpleapp/urls.py)
    # подключались к главному приложению с префиксом products/.
    path('products/', include('simpleapp.urls')),
-   path('multiply/', multiply),
+   path('multiply/', multiply),  # для выполнения логики, связанной с умножением, при обращении пользователя по пути "multiply/"
    # Добавим urls приложения, с которым ранее работали в этом модуле — “django.contrib.auth”.
    # Django скажет, как обрабатывать запросы от пользователей по ссылкам, которые начинаются с /accounts/.
    # path('accounts/', include('django.contrib.auth.urls')),
    # path("accounts/", include("accounts.urls")),  # подключим urls приложения accounts
-   path("accounts/", include("allauth.urls")),  # Оставили только allauth
+   path('accounts/', include('allauth.urls')),  # Оставили только allauth
 ]

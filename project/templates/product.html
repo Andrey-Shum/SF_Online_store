@@ -7,5 +7,18 @@ Product
 
 {% block content %}
 <h1>{{ product }}</h1>
+<hr>
 <p>{{ product.description }}</p>
+<hr>
+    <td>
+        {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
+        {% if perms.simpleapp.change_product %}
+        <hr>
+        <a href="{% url 'product_update' pk=product.id %}">Изменить</a>
+        {% endif %}
+        {% if perms.simpleapp.delete_product %}
+        <hr>
+        <a href="{% url 'product_delete' product.id %}">Удалить</a>
+        {% endif %}
+    </td>
 {% endblock content %}
