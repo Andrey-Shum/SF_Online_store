@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
     'django.contrib.flatpages',
+
     'simpleapp.apps.SimpleappConfig',
     'django_filters',
     # В данный раздел добавьте 3 обязательных приложения allauth
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.yandex',
+    # Выполнение задач по расписанию
+    "django_apscheduler"
 ]
 
 MIDDLEWARE = [
@@ -139,6 +142,8 @@ STATICFILES_DIRS = [
 # Настроим проект так, чтобы после входа нас перенаправляло на список товаров.
 # Для этого в настройках можно указать путь в переменной LOGIN_REDIRECT_URL.
 LOGIN_REDIRECT_URL = "/products"
+# Настроим проект так, чтобы после выхода нас перенаправляло на список товаров.
+LOGOUT_REDIRECT_URL = '/products/'
 
 # Этого раздела может не быть, добавьте его в указанном виде.
 AUTHENTICATION_BACKENDS = [
@@ -155,6 +160,46 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 # Чтобы allauth распознал нашу форму как ту, что должна выполняться вместо формы по умолчанию, необходимо добавить
 ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
+
+# Блок кода настроек нашего проекта работы с Yandex-почтой
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# класс отправителя сообщений (у нас установлено значение по умолчанию, а значит, эта строчка не обязательна)
+EMAIL_HOST = 'smtp.yandex.ru'
+# Хост почтового сервера - это адрес или доменное имя сервера, который обрабатывает и отправляет электронную почту.
+# Хост почтового сервера может быть использован как для отправки, так и для получения почты
+EMAIL_PORT = 465
+"""
+Порт, на который почтовый сервер принимает письма, называется почтовым портом. 
+Один из самых распространенных почтовых портов - это порт 25, который используется для передачи электронной почты 
+по протоколу SMTP (Simple Mail Transfer Protocol). 
+Однако, существуют и другие почтовые порты, 
+такие как порт 587, который используется для SMTP с шифрованием TLS (Transport Layer Security), 
+и порт 465, который используется для SMTP с шифрованием SSL (Secure Sockets Layer). 
+Использование конкретного почтового порта зависит от настроек и требований почтового сервера.
+"""
+EMAIL_HOST_USER = "AndreyTestSF"
+# логин пользователя почтового сервера
+EMAIL_HOST_PASSWORD = "zuqvkobqbkixymje"
+# пароль пользователя почтового сервера
+EMAIL_USE_TLS = False
+# необходимость использования TLS
+# (зависит от почтового сервера, смотрите документацию по настройке работы с сервером по SMTP)
+EMAIL_USE_SSL = True
+# необходимость использования SSL
+# (зависит от почтового сервера, смотрите документацию по настройке работы с сервером по SMTP)
+
+DEFAULT_FROM_EMAIL = "AndreyTestSF@yandex.ru"
+# почтовый адрес отправителя по умолчанию
+# Последняя строчка будет использоваться как значение по умолчанию для поля from в письме.
+# То есть будет отображаться в поле «отправитель» у получателя письма
+
+SERVER_EMAIL = "AndreyTestSF@yandex.ru"
+# SERVER_EMAIL содержит адрес почты, от имени которой будет отправляться письмо при вызове mail_admins и mail_manager. 
+# А переменная MANAGERS будет хранить список имён менеджеров и адресов их почтовых ящиков.
+MANAGERS = (
+    ('Ivan', 'ivan@yandex.ru'),
+    ('Petr', 'petr@yandex.ru'),
+)

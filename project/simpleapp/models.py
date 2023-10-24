@@ -1,6 +1,9 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.urls import reverse
+from django.contrib.auth.models import User
+
+
 # специальная функция reverse, которая позволяет нам указывать не путь вида /products/…,
 # а название пути.
 
@@ -26,7 +29,7 @@ class Product(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name.title()}: {self.description[:20]} ({self.price})'
+        return f'{self.name.title()}: {self.description[:10]} ({self.price})'
 
     # Django не знает, какую страницу нужно открыть после создания товара. Мы можем убрать проблему,
     # добавив метод get_absolute_url в модель
@@ -41,3 +44,16 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name.title()
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )
+    category = models.ForeignKey(
+        to='Category',
+        on_delete=models.CASCADE,
+        related_name='subscriptions',
+    )
