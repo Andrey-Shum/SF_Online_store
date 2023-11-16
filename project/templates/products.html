@@ -57,7 +57,6 @@ Products
            {% for product in products %}
            <tr>
                <td><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></td>
-                <td>{{ product.name }}</td>
                <!-- Добавим специальный фильтр truncatechars,
                 чтобы ограничить количество символов до 15.
                 Все остальные символы превратятся в многоточие. -->

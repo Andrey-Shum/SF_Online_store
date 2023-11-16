@@ -2,6 +2,7 @@ from django.urls import path
 # Импортируем созданное нами представление
 from .views import *
 urlpatterns = [
+   path('', IndexView.as_view()),
    # path — означает путь.
    # В данном случае путь ко всем товарам у нас останется пустым,
    # чуть позже станет ясно почему.
@@ -10,7 +11,9 @@ urlpatterns = [
    # Для этого вызываем метод as_view.
    # path('', ProductsList.as_view()),
    path('', ProductsList.as_view(), name='product_list'),
-   #
+
+   path('new/', NewOrderView.as_view(), name='new_order'),
+   path('take/<int:oid>', take_order, name='take_order'),
    # pk — это первичный ключ товара, который будет выводиться у нас в шаблон
    # int — указывает на то, что принимаются только целочисленные значения
    # для создания ссылки вместо имени

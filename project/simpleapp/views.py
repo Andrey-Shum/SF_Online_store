@@ -1,20 +1,87 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
-from datetime import datetime
+from datetime import datetime, timedelta
 # Импортируем класс, который говорит нам о том,
 # что в этом представлении мы будем выводить список объектов из БД
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 from django.shortcuts import render
 
 from .forms import ProductForm
-from .models import Product, Subscription, Category
+from .models import Product, Subscription, Category, Order
 from django.http import HttpResponse, HttpResponseRedirect
 from .filters import ProductFilter
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_protect
+
+from django.views import View
+from .tasks import complete_order
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from datetime import datetime
+
+
+def Start_Padge(request):
+    products = Product.objects.order_by('name')
+    paginator = Paginator(products, 7)  # разбиваем на страницы по 7 объектов
+
+    page = request.GET.get('page')
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+    return render(request, 'flatpages/Start.html', {'products': products})
+
+
+# class IndexView(View):
+#     def get(self, request):
+#         printer.delay(10)  # printer.delay(N = 10)
+#         hello.delay()
+#         return HttpResponse('Hello!')
+#
+# class IndexView(View):
+#     def get(self, request):
+#         printer.apply_async([10], countdown=5)
+#         hello.delay()
+#         return HttpResponse('Hello!')
+
+
+# главная страница - таблица заказов
+class IndexView(TemplateView):
+    template_name = "board/index.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['orders'] = Order.objects.all()
+        return context
+
+
+# форма нового заказа
+class NewOrderView(CreateView):
+    model = Order
+    fields = ['products']  # единственное поле
+    template_name = 'board/new.html'
+
+    # после валидации формы, сохраняем объект,
+    # считаем его общую стоимость
+    # и вызываем задачу "завершить заказ" через минуту после вызова
+    def form_valid(self, form):
+        order = form.save()
+        order.cost = sum([prod.price for prod in order.products.all()])
+        order.save()
+        complete_order.apply_async([order.pk], countdown=60)
+        return redirect('/')
+
+
+# представление для "кнопки", чтобы можно было забрать заказ
+def take_order(request, oid):
+    order = Order.objects.get(pk=oid)
+    order.time_out = datetime.now()
+    order.save()
+    return redirect('/')
 
 
 class ProductsList(ListView):
