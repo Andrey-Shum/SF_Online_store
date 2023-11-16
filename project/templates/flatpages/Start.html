@@ -1,0 +1,41 @@
+{% extends 'flatpages/default.html' %}
+
+
+{% block content %}
+    <h1>Добро Пожаловать</h1>
+    <h3>{{ time_now|date:'M d Y' }}</h3>
+    <hr />
+        <h2>ТоварЫ</h2>
+    <hr />
+        {% if products %}
+            <table  style="margin-left: auto; margin-right: auto;" border="3" cellspacing="7" cellpadding="7">
+                <tr>
+                    <td>Название</td>
+                    <td>Категория</td>
+                    <td>Цена</td>
+                </tr>
+                    {% for product in products %}
+                        <tr>
+                            <td><a href="{% url 'product_detail' product.pk %}">{{ product.name }}</a></td>
+                            <!-- Добавим специальный фильтр truncatechars,
+                            чтобы ограничить количество символов до 15.
+                            Все остальные символы превратятся в многоточие. -->
+                            <td>{{ product.category.name }}</td>
+                            <!-- Используем наш фильтр -->
+                            <td>{{ product.price }}</td>
+                            <td>
+                                {# А здесь доступ для каждой ссылки теперь будем проверять отдельно #}
+                                {% if perms.simpleapp.change_product %}
+                                <a href="{% url 'product_update' pk=product.id %}">Изменить</a>
+                                {% endif %}
+                                {% if perms.simpleapp.delete_product %}
+                                <a href="{% url 'product_delete' product.id %}">Удалить</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+            </table>
+        {% else %}
+            <h2>Товаров нет!</h2>
+        {% endif %}
+{% endblock content %}
