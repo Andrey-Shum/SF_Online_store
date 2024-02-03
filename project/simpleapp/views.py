@@ -21,15 +21,15 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import datetime
 
 from .tasks import hello, printer
-
+from django.core.cache import cache  # импортируем наш кэш
 
 def Start_Padge(request):
     products = Product.objects.order_by('name')
     paginator = Paginator(products, 7)  # разбиваем на страницы по 7 объектов
 
-    page = request.GET.get('page')
+    page_n = request.GET.get('page')
     try:
-        products = paginator.page(page)
+        products = paginator.page(page_n)
     except PageNotAnInteger:
         products = paginator.page(1)
     except EmptyPage:
@@ -50,12 +50,12 @@ def Start_Padge(request):
 #         return HttpResponse('Hello!')
 
 
-class IndexView(View):
-    def get(self, request):
-        printer.apply_async([10],
-                            eta=datetime.now() + timedelta(seconds=5))
-        hello.delay()
-        return HttpResponse('Hello!')
+# class IndexView(View):
+#     def get(self, request):
+#         printer.apply_async([10],
+#                             eta=datetime.now() + timedelta(seconds=5))
+#         hello.delay()
+#         return HttpResponse('Hello!')
 
 
 class ProductsList(ListView):
@@ -115,6 +115,17 @@ class ProductDetail(DetailView):
     template_name = 'product.html'
     # Название объекта, в котором будет выбранный пользователем продукт
     context_object_name = 'product'
+    queryset = Product.objects.all()
+
+    def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта, как ни странно
+        obj = cache.get(f'product-{self.kwargs["pk"]}', None)  # кэш очень похож на словарь,
+        # И метод get действует так же. Он забирает значение по ключу, если его нет, то забирает None.
+
+        # если объекта нет в кэше, то получаем его и записываем в кэш
+        if not obj:
+            obj = super().get_object(queryset=self.queryset)
+            cache.set(f'product-{self.kwargs["pk"]}', obj)
+            return obj
 
 
 def multiply(request):

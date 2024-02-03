@@ -1,10 +1,11 @@
 from django.urls import path
 # Импортируем созданное нами представление
 from .views import *
+from django.views.decorators.cache import cache_page
 
 
 urlpatterns = [
-   path('', IndexView.as_view()),
+   # path('', IndexView.as_view()),
    # path — означает путь.
    # В данном случае путь ко всем товарам у нас останется пустым,
    # чуть позже станет ясно почему.
@@ -20,6 +21,9 @@ urlpatterns = [
    # path('<int:pk>', ProductDetail.as_view()),
    # заменить на
    path('<int:pk>/', ProductDetail.as_view(), name='product_detail'),
+   # path('<int:pk>/', cache_page(60*10)(ProductDetail.as_view()), name='product_detail'),
+   # Добавим кэширование на детали товара. Раз в 10 минут товар будет записываться в кэш для экономии ресурсов.
+
    # path('create/', create_product, name='product_create'),
    path('create/', ProductCreate.as_view(), name='product_create'),
    path('<int:pk>/update/', ProductUpdate.as_view(), name='product_update'),
