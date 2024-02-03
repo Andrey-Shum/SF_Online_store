@@ -2,13 +2,13 @@
 """Утилита командной строки Django для административных задач."""
 import os
 import sys
-print(sys.path)
+# print(sys.path)
 
 
 def main():
     """Выполнять административные задачи."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')
-    print(f"Использование модуля настроек: {os.environ['DJANGO_SETTINGS_MODULE']}")
+    # print(f"Использование модуля настроек: {os.environ['DJANGO_SETTINGS_MODULE']}")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
