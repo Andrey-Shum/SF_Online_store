@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+import logging
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -19,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^59az$jrw9+8oqa)gt0_3$lw^g$k8l4*jfh#ea^2eytigle#-4'
+SECRET_KEY = 'django-insecure-^59az$jrw9+8oqa)gt0_3$lw^g$k8l4*jfh#ea^2eytigle#-4' # noqa
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -29,6 +30,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'modeltranslation',  # обязательно впишите его перед админом для переводов
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,7 +43,7 @@ INSTALLED_APPS = [
     'simpleapp.apps.SimpleappConfig',
     'django_filters',
     # В данный раздел добавьте 3 обязательных приложения allauth
-    # и одно, которое отвечает за выход через Yandex
+    # и одно, которое отвечает за выход через Yandex.
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -53,13 +55,22 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    'django.middleware.locale.LocaleMiddleware',   # Подключить для Локализации
+
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware'
+    'basic.middlewares.TimezoneMiddleware',  # для обработки часовых поясов.
+
+    # AccountMiddleware действует как связующее звено между
+    # процессом обработки запросов Django, системой сессий, аутентификацией и
+    # перенаправлениями, это ключевой элемент для работы 'django-allauth'.
+    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'allauth.account.middleware.AccountMiddleware'
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -84,42 +95,48 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
+# Если не прописать список будет выдавать языки даже на которые не переводится
+LANGUAGES = [
+    ('en-us', 'English'),
+    ('ru', 'Русский')
+]
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
-    },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'PASSWORD': 'postgres',
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', # noqa
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', # noqa
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', # noqa
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', # noqa
     },
 ]
 
@@ -133,6 +150,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale')  # Папка для хранения переводов
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
@@ -161,11 +182,14 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-# Первые два параметра указывают на то, что поле email является обязательным и уникальным.
-# Третий, наоборот, — говорит, что username необязательный. Следующий параметр указывает,
-# что аутентификация будет происходить посредством электронной почты. Напоследок мы указываем,
-# что верификация почты отсутствует. Обычно на почту отправляется подтверждение аккаунта,
-# после подтверждения которого восстанавливается полная функциональность учётной записи.
+# Первые два параметра указывают на то, что поле email является обязательным
+# и уникальным.
+# Третий, наоборот, — говорит, что username необязательный.
+# Следующий параметр указывает,
+# что аутентификация будет происходить посредством электронной почты.
+# Напоследок мы указываем, что верификация почты отсутствует. Обычно на почту
+# отправляется подтверждение аккаунта, после подтверждения которого
+# восстанавливается полная функциональность учётной записи.
 # Для тестового примера нам необязательно это делать.
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
@@ -173,16 +197,16 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 # Чтобы allauth распознал нашу форму как ту,
-# что должна выполняться вместо формы по умолчанию, необходимо добавить
+# что должна выполняться вместо формы по умолчанию, необходимо добавить.
 ACCOUNT_FORMS = {"signup": "accounts.forms.CustomSignupForm"}
 
 # Блок кода настроек нашего проекта работы с Yandex-почтой
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # класс отправителя сообщений (у нас установлено значение по умолчанию,
-# а значит, эта строчка не обязательна)
+# а значит, эта строчка необязательна)
 EMAIL_HOST = 'smtp.yandex.ru'
-# Хост почтового сервера - это адрес или доменное имя сервера,
-# который обрабатывает и отправляет электронную почту.
+# Хост почтового сервера - это адрес или доменное имя сервера, который
+# обрабатывает и отправляет электронную почту.
 # Хост почтового сервера может быть использован как для отправки,
 # так и для получения почты
 EMAIL_PORT = 465
@@ -214,9 +238,9 @@ EMAIL_USE_SSL = True
 
 DEFAULT_FROM_EMAIL = "AndreyTestSF@yandex.ru"
 # Почтовый адрес отправителя по умолчанию
-# Последняя строчка будет использоваться как значение по умолчанию
-# для поля from в письме.
-# То есть будет отображаться в поле «отправитель» у получателя письма
+# Последняя строчка будет использоваться как значение по умолчанию для
+# поля from в письме.
+# То есть будет отображаться в поле «отправитель» у получателя письма.
 
 SERVER_EMAIL = "AndreyTestSF@yandex.ru"
 # SERVER_EMAIL содержит адрес почты, от имени которой будет отправляться письмо
@@ -232,7 +256,8 @@ MANAGERS = (
 CELERY_BROKER_URL = 'redis://localhost:6379'
 # Указывает на URL брокера сообщений (Redis).
 # По умолчанию он находится на порту 6379.
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'  # указывает на хранилище результатов выполнения задач.
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+# указывает на хранилище результатов выполнения задач.
 CELERY_ACCEPT_CONTENT = ['application/json']  # допустимый формат данных.
 CELERY_TASK_SERIALIZER = 'json'  # метод сериализации задач.
 CELERY_RESULT_SERIALIZER = 'json'  # метод сериализации результатов.
@@ -244,5 +269,51 @@ CACHES = {
         'LOCATION': os.path.join(BASE_DIR, 'cache_files'),
         # Указываем, куда будем сохранять кэшируемые файлы!
         # Не забываем создать папку cache_files внутри папки с manage.py!
+    }
+}
+
+logger = logging.getLogger('project.app.some_name')
+
+LOGGING = {
+    'version': 1,  # всегда определяется как 1
+    'disable_existing_loggers': False,  # контролирует работу существующей
+    # (стандартной) схемы логирования Django
+    'style': '{',
+    'formatters': {  # formatters - В данном случае это уровень логирования сообщения и само сообщение.
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+        'verbose': { # указывается уровень логирования, время возникновения сообщения,
+            # модуль-источник сообщения, само сообщение, а также процесс и поток, в которых оно возникло
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {  # В handlers можно обнаружить два обработчика.
+        'console': {  # Первый отправляет сообщения INFO  выше в консоль. Кроме того, накладывается фильтр, определенный выше.
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'mail_admins': {  # Второй обработчик передает сообщения уровня ERROR на отправление по почте.
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler'
+        }
+    },
+    'loggers': {  # определяется два регистратора
+        'django': {  # отправляет все сообщения на консоль (указывается handler 'console', определенный выше)
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.request': {  # передает все сообщения уровня ERROR в обработчик mail_admins
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        }
     }
 }

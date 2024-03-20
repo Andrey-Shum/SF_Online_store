@@ -1,15 +1,19 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin # noqa
 from django.urls import reverse_lazy
-from datetime import datetime, timedelta
+# from datetime import datetime, timedelta
 # Импортируем класс, который говорит нам о том,
 # что в этом представлении мы будем выводить список объектов из БД
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from django.utils import timezone
 from django.shortcuts import render, redirect
 
 from .forms import ProductForm
 from .models import Product, Subscription, Category
 from django.http import HttpResponse
 from .filters import ProductFilter
+
+from django.utils.translation import gettext as _  #  импортируем функцию для перевода
+# from django.utils.translation import activate, get_supported_language_variant, LANGUAGE_SESSION_KEY
 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Exists, OuterRef
@@ -20,19 +24,25 @@ from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from datetime import datetime
 
-from .tasks import hello, printer
+# from .tasks import hello, printer
 from django.core.cache import cache  # импортируем наш кэш
+
+import pytz #  импортируем стандартный модуль для работы с часовыми поясами
+
 
 def Start_Padge(request):
     products = Product.objects.order_by('name')
-    paginator = Paginator(products, 7)  # разбиваем на страницы по 7 объектов
+    paginator = Paginator(products,  7)  # разбиваем на страницы по 7 объектов # noqa
 
+    # Используйте request.GET.get('page') для получения значения параметра 'page' # noqa
     page_n = request.GET.get('page')
     try:
         products = paginator.page(page_n)
     except PageNotAnInteger:
+        # Если страница не является целым числом, переходим на первую страницу
         products = paginator.page(1)
     except EmptyPage:
+        # Если страница пустая, переходим на последнюю страницу
         products = paginator.page(paginator.num_pages)
     return render(request, 'flatpages/Start.html', {'products': products})
 
@@ -42,7 +52,8 @@ def Start_Padge(request):
 #         printer.delay(10)  # printer.delay(N = 10)
 #         hello.delay()
 #         return HttpResponse('Hello!')
-#
+
+
 # class IndexView(View):
 #     def get(self, request):
 #         printer.apply_async([10], countdown=5)
@@ -56,6 +67,57 @@ def Start_Padge(request):
 #                             eta=datetime.now() + timedelta(seconds=5))
 #         hello.delay()
 #         return HttpResponse('Hello!')
+
+
+# class Index(View):
+#     @staticmethod
+#     def get(request):
+#         string = _('Hello world')
+#
+#         return HttpResponse(string)
+
+
+# class Index(View):
+#     def get(self, request):
+#         string = _('Hello world')
+#
+#         context = {
+#             'string': string
+#         }
+#         return HttpResponse(render(request, 'index.html', context))
+
+
+# class Index(View):
+#     def get(self, request):
+#         # Переводчики: Это сообщение появляется только на главной странице.
+#         models = Product.objects.all()
+#
+#         context = {
+#             'models': models,
+#         }
+#
+#         return HttpResponse(render(request, 'index.html', context))
+
+
+class Index(View):
+    def get(self, request):
+        # .  Переводчики: Это сообщение появляется только на главной странице.
+        models = Product.objects.all()
+
+        context = {
+            'models': models,
+            'current_time': timezone.localtime(timezone.now()),
+            'timezones': pytz.common_timezones
+            # добавляем в контекст все доступные часовые пояса
+        }
+
+        return HttpResponse(render(request, 'index.html', context))
+
+    #  по пост-запросу будем добавлять в сессию часовой пояс, который
+    #  и будет обрабатываться написанным нами ранее middleware
+    def post(self, request):
+        request.session['django_timezone'] = request.POST['timezone']
+        return redirect('/index')
 
 
 class ProductsList(ListView):
@@ -117,9 +179,11 @@ class ProductDetail(DetailView):
     context_object_name = 'product'
     queryset = Product.objects.all()
 
-    def get_object(self, *args, **kwargs):  # переопределяем метод получения объекта, как ни странно
-        obj = cache.get(f'product-{self.kwargs["pk"]}', None)  # кэш очень похож на словарь,
-        # И метод get действует так же. Он забирает значение по ключу, если его нет, то забирает None.
+    # Переопределяем метод получения объекта, как ни странно кэш очень похож
+    # на словарь, и метод get действует так же. Он забирает значение по ключу,
+    # если его нет, то забирает None.
+    def get_object(self, *args, **kwargs):
+        obj = cache.get(f'product-{self.kwargs["pk"]}', None)
 
         # если объекта нет в кэше, то получаем его и записываем в кэш
         if not obj:
@@ -128,6 +192,12 @@ class ProductDetail(DetailView):
             return obj
 
 
+# Для передачи параметров в этот код вам, но отправить GET
+# с параметрами "number" и "multiplier".
+# Например, если Вы хотите умножить число 5 на 3,
+# Вам нужно отправить GET запрос на URL, где этот код обрабатывается,
+# с параметрами вида: `?number=5&multiplier=3`.
+# http://127.0.0.1:8000/multiply/?number=5&multiplier=3
 def multiply(request):
     number = request.GET.get('number')
     multiplier = request.GET.get('multiplier')
@@ -142,8 +212,9 @@ def multiply(request):
 
 
 # def create_product(request):
-#     form = ProductForm()  # если здесь стока то перейдёт в рендер форму с информацией об ошибке
-#     # если после пользователю отправится пустая форма без информации об ошибке
+#     form = ProductForm()  # если здесь стока то перейдёт в рендер форму
+#     # с информацией об ошибке если после пользователю отправится пустая форма
+#     # без информации об ошибке
 #
 #     if request.method == 'POST':
 #         form = ProductForm(request.POST)
@@ -202,7 +273,8 @@ def subscriptions(request):
                 category=category,
             ).delete()
 
-    # Блок кода выполняет запрос к категориям и проверяет подписан ли текущий пользователь на каждую категорию
+    # Блок кода выполняет запрос к категориям и проверяет подписан ли текущий
+    # пользователь на каждую категорию
     categories_with_subscriptions = Category.objects.annotate(
         user_subscribed=Exists(
             Subscription.objects.filter(

@@ -1,0 +1,210 @@
+<!--  наследуемся от шаблона default.html, который мы создавали для flatpages -->
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+Index
+{% endblock title %}
+
+{% block content %}
+
+<!--{% load i18n %} &lt;!&ndash; Загружаем теги с переводами, без этой строки ничего не будет работать &ndash;&gt;-->
+
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Page title</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    {{ string }} &lt;!&ndash; Это уже знакомая нам переменная, просто засунули её в шаблон &ndash;&gt;-->
+<!--    {% trans "Check out my new cool translation" %}! &lt;!&ndash; Переводим строку &ndash;&gt;-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!--  -->
+
+<!--{% load i18n %}-->
+
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Page title</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} &lt;!&ndash; Не забываем по csrf_token для POST запросов &ndash;&gt;-->
+<!--        <input type="hidden" name="next" value="{{ redirect_to }}">-->
+<!--        {% get_current_language as LANGUAGE_CODE %}-->
+<!--        <select name="language" id="">-->
+<!--            {% get_available_languages as LANGUAGES %} &lt;!&ndash; получаем языки &ndash;&gt;-->
+<!--            {% get_language_info_list for LANGUAGES as languages %} &lt;!&ndash; Помещаем их в список languages &ndash;&gt;-->
+
+<!--            {% for language in languages %} &lt;!&ndash; Итерируясь по списку, выводим их название на языке пользователя и код &ndash;&gt;-->
+<!--                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %}>-->
+<!--                    {{ language.name_local }} - {{ language.code }}-->
+<!--                </option>-->
+<!--            {% endfor %}-->
+<!--        </select>-->
+<!--        <input type="submit" value="set">-->
+<!--    </form>-->
+
+<!--    {{ string }} &lt;!&ndash; Это уже знакомая нам переменная, просто засунули её в шаблон &ndash;&gt;-->
+<!--    {% trans "Check out my new cool translation" %}! &lt;!&ndash; Переводим строку &ndash;&gt;-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!-- Перевод локализация -->
+
+<!--{% load i18n %}-->
+
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Page title</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} &lt;!&ndash; Не забываем по csrf_token для POST-запросов &ndash;&gt;-->
+<!--        <input type="hidden" name="next" value="{{ redirect_to }}">-->
+
+<!--        <select name="language" id="">-->
+<!--            {% get_available_languages as LANGUAGES %} &lt;!&ndash; получаем языки &ndash;&gt;-->
+<!--            {% get_language_info_list for LANGUAGES as languages %} &lt;!&ndash; Помещаем их в список languages &ndash;&gt;-->
+
+<!--            {% for language in languages %} &lt;!&ndash; Итерируясь по списку, выводим их название на языке пользователя и код &ndash;&gt;-->
+<!--                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %} >-->
+<!--                    {{ language.name_local }} - {{ language.code }}-->
+<!--                </option>-->
+<!--            {% endfor %}-->
+<!--        </select>-->
+<!--        <input type="submit" value="set">-->
+<!--    </form>-->
+
+<!--    {% for model in models %}-->
+<!--    <div class="model-class">-->
+<!--        {{ model.name }}-->
+<!--    </div>-->
+<!--    {% endfor %}-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!-- часовые пояса -->
+
+<!--{% load i18n %}-->
+<!--{% load tz %} &lt;!&ndash; не забываем загрузить тег для работы с часовыми поясами &ndash;&gt;-->
+
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Page title</title>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--    <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} &lt;!&ndash; Не забываем по csrf_token для POST запросов &ndash;&gt;-->
+<!--        <input type="hidden" name="next" value="{{ redirect_to }}">-->
+
+<!--        <select name="language" id="">-->
+<!--            {% get_available_languages as LANGUAGES %} &lt;!&ndash; получаем языки &ndash;&gt;-->
+<!--            {% get_language_info_list for LANGUAGES as languages %} &lt;!&ndash; Помещаем их в список languages &ndash;&gt;-->
+
+<!--            {% for language in languages %} &lt;!&ndash; Итерируясь по списку, выводим их название на языке пользователя и код &ndash;&gt;-->
+<!--                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected {% endif %} >-->
+<!--                    {{ language.name_local }} - {{ language.code }}-->
+<!--                </option>-->
+<!--            {% endfor %}-->
+<!--        </select>-->
+<!--        <input type="submit" value="set">-->
+<!--    </form>-->
+
+<!--    {% get_current_timezone as TIME_ZONE %}-->
+<!--    <form action="" method="POST">-->
+<!--        {% csrf_token %}-->
+<!--        <label for="timezone">Time zone:</label>-->
+<!--        <select name="timezone">-->
+<!--            {% for tz in timezones %}-->
+<!--            <option value="{{ tz }}"{% if tz == TIME_ZONE %} selected{% endif %}>{{ tz }}</option>-->
+<!--            {% endfor %}-->
+<!--        </select>-->
+<!--        <input type="submit" value="Set">-->
+<!--    </form>-->
+
+<!--    {{ TIME_ZONE }}-->
+<!--    {{ current_time|timezone:TIME_ZONE }} &lt;!&ndash; Отображаем время в выбранном часовом поясе  &ndash;&gt;-->
+
+<!--    {% for model in models %}-->
+<!--    <div class="model-class">-->
+<!--        {{ model.name }}-->
+<!--    </div>-->
+<!--    {% endfor %}-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!-- Тёмная тема от времени у нас будет меняться оформление сайта -->
+
+{% load i18n %}
+{% load tz %} <!-- не забываем загрузить тег для работы с часовыми поясами -->
+
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page title</title>
+    <!-- Если сейчас больше чем 19 или же меньше 7, то выводим тёмную тему, иначе выводим светлую -->
+    <style>
+        body {background-color: {% if current_time.hour >= 19 or current_time.hour <= 7 %} darkcyan {% else %} powderblue {% endif %};}
+    </style>
+</head>
+<body>
+
+    <form action="{% url 'set_language' %}" method="POST"> {% csrf_token %} <!-- Не забываем по csrf_token для POST-запросов -->
+        <input type="hidden" name="next" value="{{ redirect_to }}">
+
+        <select name="language" id="">
+            {% get_available_languages as LANGUAGES %} <!-- получаем языки -->
+            {% get_language_info_list for LANGUAGES as languages %} <!-- Помещаем их в список languages -->
+
+            {% for language in languages %} <!-- Итерируясь по списку, выводим их название на языке пользователя и код -->
+                <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected >{% endif %} >
+                    {{ language.name_local }} - {{ language.code }}
+                </option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="set">
+    </form>
+
+    {% get_current_timezone as TIME_ZONE %}
+    <form action="" method="POST">
+        {% csrf_token %}
+        <label for="timezone">Time zone:</label>
+        <select name="timezone">
+            {% for tz in timezones %}
+            <option value="{{ tz }}"{% if tz == TIME_ZONE %} selected{% endif %}>{{ tz }}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Set">
+    </form>
+
+    {{ TIME_ZONE }}
+    {{ current_time|timezone:TIME_ZONE }} <!-- Отображаем время в выбранном часовом поясе  -->
+
+    {% for model in models %}
+    <div class="model-class">
+        {{ model.name }}
+    </div>
+    {% endfor %}
+
+
+</body>
+</html>
+{% endblock content %}

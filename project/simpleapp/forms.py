@@ -45,8 +45,8 @@ class ProductForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        name = cleaned_data.get("name")
-        description = cleaned_data.get("description")
+        name = get("name")
+        description = get("description")
 
         if name == description:
             raise ValidationError(

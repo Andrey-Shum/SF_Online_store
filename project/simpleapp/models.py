@@ -3,7 +3,8 @@ from django.core.validators import MinValueValidator
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.core.cache import cache
-
+from django.utils.translation import gettext as _
+from django.utils.translation import pgettext_lazy
 
 # специальная функция reverse, которая позволяет нам указывать
 # не путь вида /products/…, а название пути.
@@ -24,6 +25,7 @@ class Product(models.Model):
         to='Category',
         on_delete=models.CASCADE,
         related_name='products',  # все продукты в категории будут доступны через поле products
+        verbose_name=pgettext_lazy('help text for Product model', 'This is the help text'),
     )
     # category = models.ForeignKey('Category', on_delete=models.CASCADE)
     description = models.TextField()
@@ -37,7 +39,8 @@ class Product(models.Model):
         return reverse('product_detail', args=[str(self.id)])
 
     # def get_absolute_url(self):
-    #     # добавим абсолютный путь, чтобы после создания нас перебрасывало на страницу с товаром
+    #     # добавим абсолютный путь, чтобы после создания нас перебрасывало на
+    #     страницу с товаром
     #     return f'/products/{self.id}'
 
     def save(self, *args, **kwargs):
@@ -48,7 +51,9 @@ class Product(models.Model):
 # Категория, к которой будет привязываться товар
 class Category(models.Model):
     # названия категорий тоже не должны повторяться
-    name = models.CharField(max_length=100, unique=True)
+    # name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100, unique=True, help_text=_('category name'))
+    # добавим переводящийся текст подсказку к полю
 
     def __str__(self):
         return self.name.title()
